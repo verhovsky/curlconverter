@@ -42,6 +42,7 @@
     "lint:fix": "./node_modules/standard/bin/cmd.js --fix index.js generators/*.js bin/*.js test.js *.js"
   },
   "bin": {
-    "curlconverter": "bin/cli.js"
+    "curlconverter": "bin/cli.js",
+    "curl-to-python": "bin/curl-to-python.js"
   }
 }
