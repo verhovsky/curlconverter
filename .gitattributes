@@ -1,2 +1,2 @@
 fixtures/** linguist-generated
-fixtures/curl_commands/* linguist-language=bash
+fixtures/curl_commands/* -linguist-generated
