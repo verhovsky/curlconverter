@@ -1,14 +1,24 @@
 #!/usr/bin/env node
 
+import { curlLongOpts, curlShortOpts } from "./curl/getparam.js";
 import {
-  curlLongOpts,
-  curlShortOpts,
   parseArgs,
-  buildRequest,
+  buildRequests,
   parseCurlCommand,
   CCError,
   has,
 } from "./util.js";
+import {
+  PARAM_OK,
+  PARAM_OPTION_AMBIGUOUS,
+  PARAM_OPTION_UNKNOWN,
+  PARAM_REQUIRES_PARAMETER,
+  PARAM_BAD_USE,
+  PARAM_HELP_REQUESTED,
+  PARAM_MANUAL_REQUESTED,
+  PARAM_VERSION_INFO_REQUESTED,
+  PARAM_ENGINES_REQUESTED,
+} from "./curl/getparam.js";
 import type { LongOpts, ShortOpts, Request } from "./util.js";
 
 import { _toAnsible } from "./generators/ansible.js";
@@ -117,22 +127,30 @@ function exitWithError(error: unknown, verbose = false): never {
   process.exit(2); // curl exits with 2 so we do too
 }
 
-const argv = process.argv.slice(2);
-let parsedArguments;
+const argv = process.argv.slice(1); // remove /bin/node
+const _global = { configs: [{}] };
+let result;
 try {
-  parsedArguments = parseArgs(argv, opts);
+  result = parseArgs(argv, _global, opts);
 } catch (e) {
   exitWithError(e);
 }
-if (parsedArguments.help) {
-  console.log(USAGE.trim());
-  process.exit(0);
-}
-if (parsedArguments.version) {
+
+if (result === PARAM_VERSION_INFO_REQUESTED) {
   console.log("curlconverter " + VERSION);
   process.exit(0);
 }
+if (
+  result === PARAM_HELP_REQUESTED ||
+  result === PARAM_MANUAL_REQUESTED ||
+  result === PARAM_ENGINES_REQUESTED
+  // || result !== PARAM_OK
+) {
+  console.log(USAGE.trim());
+  process.exit(0);
+}
 
+const parsedArguments = _global.configs[0]; // TODO: extra args should go on _global
 const argc = Object.keys(parsedArguments).length;
 const language = parsedArguments.language || defaultLanguage;
 const stdin = parsedArguments.stdin;
@@ -180,7 +198,7 @@ if (argc === 0) {
   }
 } else {
   try {
-    request = buildRequest(parsedArguments);
+    request = buildRequests(_global);
   } catch (e) {
     exitWithError(e, parsedArguments.verbose);
   }

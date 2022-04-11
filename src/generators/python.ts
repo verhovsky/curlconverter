@@ -603,6 +603,6 @@ export const _toPython = (request: Request): string => {
   return pythonCode + "\n";
 };
 export const toPython = (curlCommand: string | string[]): string => {
-  const request = util.parseCurlCommand(curlCommand);
-  return _toPython(request);
+  const { global, stdin, stdout } = util.parseCurlCommand(curlCommand);
+  return _toPython(global);
 };

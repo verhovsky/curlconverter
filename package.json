@@ -70,7 +70,8 @@
     "pregen-test": "npm run compile",
     "gen-test": "node --enable-source-maps ./dist/tools/gen-test.js",
     "compare-requests": "npm run compile && node --enable-source-maps ./dist/tools/compare-requests.js",
-    "compare-request": "npm run compile && node --enable-source-maps ./dist/tools/compare-requests.js"
+    "compare-request": "npm run compile && node --enable-source-maps ./dist/tools/compare-requests.js",
+    "parse-command": "TSC_COMPILE_ON_ERROR=true npm run compile; node --enable-source-maps ./dist/tools/parse-command.js"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
