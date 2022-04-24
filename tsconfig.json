@@ -15,6 +15,10 @@
     "noUnusedLocals": false,
     "noImplicitReturns": true
   },
+  "ts-node": {
+    "esm": true,
+    "files": true
+  },
   "include": ["src/**/*", "test/**/*", "tools/**/*", "index.d.ts"],
   "exclude": [
     "tools/extract_curl_args.py",

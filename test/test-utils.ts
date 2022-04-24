@@ -6,7 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-export const fixturesDir = path.resolve(__dirname, "../../test/fixtures");
+export const fixturesDir = path.resolve(__dirname, "../test/fixtures");
 
 // Special case that returns the parsed argument object
 const toParser = (curl: string | string[]): string => {
