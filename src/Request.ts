@@ -465,6 +465,14 @@ function buildData(
   return [data, dataStr, dataStrReadsFile];
 }
 
+function parseFormStr(config: OperationConfig, boundary: string): FormParam[] {
+  if (!config.data || !config.data.length || !config.data.isString()) {
+  const form: FormParam[] = [];
+
+  delete config.data;
+  return form;
+}
+
 function buildRequest(
   global: GlobalConfig,
   config: OperationConfig,
@@ -645,6 +653,19 @@ function buildRequest(
     headers.setIfMissing("Accept", "application/json");
   } else if (config.data) {
     headers.setIfMissing("Content-Type", "application/x-www-form-urlencoded");
+    const contentType = headers.getContentType();
+    if (contentType && contentType.toString() === "application/form-data") {
+      // "Copy as cURL" puts multipart/form-data as a string in --data, try to parse it out
+      const boundary = contentType.toString().match(/boundary=(.*)/);
+      if (boundary) {
+        // curl actually doesn't respect the boundary in the Content-Type header
+        // and will append a second one and use that.
+        try {
+          // Deletes config.data on success
+          request.multipartUploads = parseFormStr(dataStr, boundary[1]);
+        } catch {}
+      }
+    }
   } else if (config.form) {
     // TODO: set content-type?
     request.multipartUploads = parseForm(config.form);
