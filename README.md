@@ -1,6 +1,6 @@
 # [curlconverter](https://curlconverter.com)
 
-Transpile [`curl`](https://en.wikipedia.org/wiki/CURL) commands into C#, ColdFusion ML, Clojure, Dart, Elixir, Go, HTTPie, Java, JavaScript, Kotlin, MATLAB, PHP, Python, R, Ruby, Rust, Wget, Ansible, HAR, HTTP or JSON.
+Transpile [`curl`](https://en.wikipedia.org/wiki/CURL) commands into C#, ColdFusion ML, Clojure, Dart, Elixir, Go, HTTPie, Java, JavaScript, Kotlin, MATLAB, Objective-C, OCaml, PHP, PowerShell, Python, R, Ruby, Rust, Swift, Wget, Ansible, HAR, HTTP or JSON.
 
 Try it on [curlconverter.com](https://curlconverter.com) or from the command line as a drop-in replacement for `curl`:
 
@@ -90,16 +90,20 @@ Choose the output language by passing `--language <language>`. The options are
 - `har`
 - `http`
 - `httpie`
-- `java`, `java-httpurlconnection`, `java-okhttp`
-- `javascript`, `node`, `node-axios`, `node-got`, `node-request`
+- `java`, `java-async`, `java-httpurlconnection`, `java-okhttp`
+- `javascript`, `node`, `javascript-jquery`, `javascript-xhr`, `node-http`, `node-axios`, `node-got`, `node-request`
 - `json`
 - `kotlin`
 - `matlab`
+- `objectivec`
+- `ocaml`
 - `php`, `php-guzzle`, `php-requests`
-- `python` (the default)
+- `powershell`, `powershell-webrequest`
+- `python` (the default), `python-http`
 - `r`
 - `ruby`
 - `rust`
+- `swift`
 - `wget`
 
 `--verbose` enables printing of conversion warnings and error tracebacks.

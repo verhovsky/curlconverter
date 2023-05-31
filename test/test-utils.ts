@@ -91,6 +91,11 @@ const converters = {
     extension: ".java",
     converter: curlconverter.toJava,
   },
+  "java-async": {
+    name: "Java + AsyncHttpClient",
+    extension: ".java",
+    converter: curlconverter.toJavaAsync,
+  },
   "java-httpurlconnection": {
     name: "Java + HttpUrlConnection",
     extension: ".java",
@@ -105,6 +110,16 @@ const converters = {
     name: "JavaScript",
     extension: ".js",
     converter: curlconverter.toJavaScript,
+  },
+  "javascript-jquery": {
+    name: "JavaScript + jQuery",
+    extension: ".js",
+    converter: curlconverter.toJavaScriptJquery,
+  },
+  "javascript-xhr": {
+    name: "JavaScript + XHR",
+    extension: ".js",
+    converter: curlconverter.toJavaScriptXHR,
   },
   json: {
     name: "Json",
@@ -136,10 +151,25 @@ const converters = {
     extension: ".js",
     converter: curlconverter.toNodeGot,
   },
+  "node-http": {
+    name: "Node + http",
+    extension: ".js",
+    converter: curlconverter.toNodeHttp,
+  },
   "node-request": {
     name: "Node + request",
     extension: ".js",
     converter: curlconverter.toNodeRequest,
+  },
+  objectivec: {
+    name: "Objective-C",
+    extension: ".m",
+    converter: curlconverter.toObjectiveC,
+  },
+  ocaml: {
+    name: "OCaml",
+    extension: ".ml",
+    converter: curlconverter.toOCaml,
   },
   php: {
     name: "PHP",
@@ -151,10 +181,25 @@ const converters = {
     extension: ".php",
     converter: curlconverter.toPhpGuzzle,
   },
+  powershell: {
+    name: "PowerShell + RestMethod",
+    extension: ".ps1",
+    converter: curlconverter.toPowershell,
+  },
+  "powershell-webrequest": {
+    name: "PowerShell + WebRequest",
+    extension: ".ps1",
+    converter: curlconverter.toPowershellWebRequest,
+  },
   python: {
     name: "Python",
     extension: ".py",
     converter: curlconverter.toPython,
+  },
+  "python-http": {
+    name: "Python + http.client",
+    extension: ".py",
+    converter: curlconverter.toPythonHttp,
   },
   r: {
     name: "R",
@@ -170,6 +215,11 @@ const converters = {
     name: "Rust",
     extension: ".rs",
     converter: curlconverter.toRust,
+  },
+  swift: {
+    name: "Swift",
+    extension: ".swift",
+    converter: curlconverter.toSwift,
   },
   wget: {
     name: "Wget",

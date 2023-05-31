@@ -1,12 +1,6 @@
 export { toAnsible, toAnsibleWarn } from "./generators/ansible.js";
 export { toCFML, toCFMLWarn } from "./generators/cfml.js";
 export { toClojure, toClojureWarn } from "./generators/clojure.js";
-export {
-  toJavaScript,
-  toJavaScriptWarn,
-} from "./generators/javascript/javascript.js";
-export { toNodeAxios, toNodeAxiosWarn } from "./generators/javascript/axios.js";
-export { toNodeGot, toNodeGotWarn } from "./generators/javascript/got.js";
 export { toCSharp, toCSharpWarn } from "./generators/csharp.js";
 export { toDart, toDartWarn } from "./generators/dart.js";
 export { toElixir, toElixirWarn } from "./generators/elixir.js";
@@ -15,11 +9,24 @@ export { toHarString, toHarStringWarn } from "./generators/har.js";
 export { toHTTP, toHTTPWarn } from "./generators/http.js";
 export { toHttpie, toHttpieWarn } from "./generators/httpie.js";
 export { toJava, toJavaWarn } from "./generators/java/java.js";
+export { toJavaAsync, toJavaAsyncWarn } from "./generators/java/async.js";
 export {
   toJavaHttpUrlConnection,
   toJavaHttpUrlConnectionWarn,
 } from "./generators/java/httpurlconnection.js";
 export { toJavaOkHttp, toJavaOkHttpWarn } from "./generators/java/okhttp.js";
+export {
+  toJavaScript,
+  toJavaScriptWarn,
+} from "./generators/javascript/javascript.js";
+export {
+  toJavaScriptJquery,
+  toJavaScriptJqueryWarn,
+} from "./generators/javascript/jquery.js";
+export {
+  toJavaScriptXHR,
+  toJavaScriptXHRWarn,
+} from "./generators/javascript/xhr.js";
 export { toJsonString, toJsonStringWarn } from "./generators/json.js";
 export { toKotlin, toKotlinWarn } from "./generators/kotlin.js";
 export { toMATLAB, toMATLABWarn } from "./generators/matlab/matlab.js";
@@ -28,13 +35,25 @@ export {
   toNodeRequest,
   toNodeRequestWarn,
 } from "./generators/javascript/request.js";
+export { toNodeAxios, toNodeAxiosWarn } from "./generators/javascript/axios.js";
+export { toNodeGot, toNodeGotWarn } from "./generators/javascript/got.js";
+export { toNodeHttp, toNodeHttpWarn } from "./generators/javascript/http.js";
+export { toObjectiveC, toObjectiveCWarn } from "./generators/objectivec.js";
+export { toOCaml, toOCamlWarn } from "./generators/ocaml.js";
 export { toPhp, toPhpWarn } from "./generators/php/php.js";
 export { toPhpGuzzle, toPhpGuzzleWarn } from "./generators/php/guzzle.js";
 export { toPhpRequests, toPhpRequestsWarn } from "./generators/php/requests.js";
-export { toPython, toPythonWarn } from "./generators/python.js";
+export { toPowershell, toPowershellWarn } from "./generators/powershell.js";
+export {
+  toPowershellWebRequest,
+  toPowershellWebRequestWarn,
+} from "./generators/powershell.js";
+export { toPython, toPythonWarn } from "./generators/python/python.js";
+export { toPythonHttp, toPythonHttpWarn } from "./generators/python/http.js";
 export { toR, toRWarn } from "./generators/r.js";
 export { toRuby, toRubyWarn } from "./generators/ruby.js";
 export { toRust, toRustWarn } from "./generators/rust.js";
+export { toSwift, toSwiftWarn } from "./generators/swift.js";
 export { toWget, toWgetWarn } from "./generators/wget.js";
 
 // backwards compatibility aliases

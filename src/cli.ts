@@ -25,6 +25,7 @@ import { _toHarString, toHarStringWarn } from "./generators/har.js";
 import { _toHTTP, toHTTPWarn } from "./generators/http.js";
 import { _toHttpie, toHttpieWarn } from "./generators/httpie.js";
 import { _toJava, toJavaWarn } from "./generators/java/java.js";
+import { _toJavaAsync, toJavaAsyncWarn } from "./generators/java/async.js";
 import {
   _toJavaHttpUrlConnection,
   toJavaHttpUrlConnectionWarn,
@@ -34,6 +35,14 @@ import {
   _toJavaScript,
   toJavaScriptWarn,
 } from "./generators/javascript/javascript.js";
+import {
+  _toJavaScriptJquery,
+  toJavaScriptJqueryWarn,
+} from "./generators/javascript/jquery.js";
+import {
+  _toJavaScriptXHR,
+  toJavaScriptXHRWarn,
+} from "./generators/javascript/xhr.js";
 import { _toJsonString, toJsonStringWarn } from "./generators/json.js";
 import { _toKotlin, toKotlinWarn } from "./generators/kotlin.js";
 import { _toMATLAB, toMATLABWarn } from "./generators/matlab/matlab.js";
@@ -43,20 +52,30 @@ import {
   toNodeAxiosWarn,
 } from "./generators/javascript/axios.js";
 import { _toNodeGot, toNodeGotWarn } from "./generators/javascript/got.js";
+import { _toNodeHttp, toNodeHttpWarn } from "./generators/javascript/http.js";
 import {
   _toNodeRequest,
   toNodeRequestWarn,
 } from "./generators/javascript/request.js";
+import { _toObjectiveC, toObjectiveCWarn } from "./generators/objectivec.js";
+import { _toOCaml, toOCamlWarn } from "./generators/ocaml.js";
 import { _toPhp, toPhpWarn } from "./generators/php/php.js";
 import { _toPhpGuzzle, toPhpGuzzleWarn } from "./generators/php/guzzle.js";
 import {
   _toPhpRequests,
   toPhpRequestsWarn,
 } from "./generators/php/requests.js";
-import { _toPython, toPythonWarn } from "./generators/python.js";
+import { _toPowershell, toPowershellWarn } from "./generators/powershell.js";
+import {
+  _toPowershellWebRequest,
+  toPowershellWebRequestWarn,
+} from "./generators/powershell.js";
+import { _toPython, toPythonWarn } from "./generators/python/python.js";
+import { _toPythonHttp, toPythonHttpWarn } from "./generators/python/http.js";
 import { _toR, toRWarn } from "./generators/r.js";
 import { _toRuby, toRubyWarn } from "./generators/ruby.js";
 import { _toRust, toRustWarn } from "./generators/rust.js";
+import { _toSwift, toSwiftWarn } from "./generators/swift.js";
 import { _toWget, toWgetWarn } from "./generators/wget.js";
 
 import fs from "fs";
@@ -89,37 +108,58 @@ const translate: {
   http: [_toHTTP, toHTTPWarn],
   httpie: [_toHttpie, toHttpieWarn],
   java: [_toJava, toJavaWarn],
+  "java-async": [_toJavaAsync, toJavaAsyncWarn],
   "java-httpurlconnection": [
     _toJavaHttpUrlConnection,
     toJavaHttpUrlConnectionWarn,
   ],
   "java-okhttp": [_toJavaOkHttp, toJavaOkHttpWarn],
   javascript: [_toJavaScript, toJavaScriptWarn],
-  "javascript-fetch": [_toJavaScript, toJavaScriptWarn], // undocumented alias
   "javascript-axios": [_toNodeAxios, toNodeAxiosWarn], // undocumented alias
+  "javascript-fetch": [_toJavaScript, toJavaScriptWarn], // undocumented alias
   "javascript-got": [_toNodeGot, toNodeGotWarn], // undocumented alias
+  "javascript-jquery": [_toJavaScriptJquery, toJavaScriptJqueryWarn],
   "javascript-request": [_toNodeRequest, toNodeRequestWarn], // undocumented alias
+  "javascript-xhr": [_toJavaScriptXHR, toJavaScriptXHRWarn],
   json: [_toJsonString, toJsonStringWarn],
   kotlin: [_toKotlin, toKotlinWarn],
   matlab: [_toMATLAB, toMATLABWarn],
   node: [_toNode, toNodeWarn],
-  "node-fetch": [_toNode, toNodeWarn], // undocumented alias
   "node-axios": [_toNodeAxios, toNodeAxiosWarn],
+  "node-fetch": [_toNode, toNodeWarn], // undocumented alias
   "node-got": [_toNodeGot, toNodeGotWarn],
+  "node-http": [_toNodeHttp, toNodeHttpWarn], // undocumented alias
+  "node-jquery": [_toJavaScriptJquery, toJavaScriptJqueryWarn], // undocumented alias
   "node-request": [_toNodeRequest, toNodeRequestWarn],
+  "node-xhr": [_toJavaScriptXHR, toJavaScriptXHRWarn], // undocumented alias
   nodejs: [_toNode, toNodeWarn], // undocumented alias
-  "nodejs-fetch": [_toNode, toNodeWarn], // undocumented alias
   "nodejs-axios": [_toNodeAxios, toNodeAxiosWarn], // undocumented alias
+  "nodejs-fetch": [_toNode, toNodeWarn], // undocumented alias
   "nodejs-got": [_toNodeGot, toNodeGotWarn], // undocumented alias
+  "nodejs-http": [_toNodeHttp, toNodeHttpWarn], // undocumented alias
+  "nodejs-jquery": [_toJavaScriptJquery, toJavaScriptJqueryWarn], // undocumented alias
   "nodejs-request": [_toNodeRequest, toNodeRequestWarn], // undocumented alias
+  "nodejs-xhr": [_toJavaScriptXHR, toJavaScriptXHRWarn], // undocumented alias
+  objectivec: [_toObjectiveC, toObjectiveCWarn],
+  objc: [_toObjectiveC, toObjectiveCWarn], // undocumented alias
+  ocaml: [_toOCaml, toOCamlWarn],
   php: [_toPhp, toPhpWarn],
   "php-curl": [_toPhp, toPhpWarn], // undocumented alias
   "php-guzzle": [_toPhpGuzzle, toPhpGuzzleWarn],
   "php-requests": [_toPhpRequests, toPhpRequestsWarn],
+  powershell: [_toPowershell, toPowershellWarn],
+  "powershell-restmethod": [_toPowershell, toPowershellWarn], // undocumented alias
+  "powershell-webrequest": [
+    _toPowershellWebRequest,
+    toPowershellWebRequestWarn,
+  ],
   python: [_toPython, toPythonWarn],
+  "python-requests": [_toPython, toPythonWarn], // undocumented alias
+  "python-http": [_toPythonHttp, toPythonHttpWarn],
   r: [_toR, toRWarn],
   ruby: [_toRuby, toRubyWarn],
   rust: [_toRust, toRustWarn],
+  swift: [_toSwift, toSwiftWarn],
   wget: [_toWget, toWgetWarn],
 };
 
@@ -136,23 +176,21 @@ language: the language to convert the curl command to. The choices are
   har
   http
   httpie
-  java
-  java-httpurlconnection
-  java-okhttp
-  javascript
+  java java-async java-httpurlconnection java-okhttp
+  javascript javascript-jquery javascript-xhr
   json
   kotlin
   matlab
-  node
-  node-axios
-  node-request
-  php
-  php-guzzle
-  php-requests
-  python (the default)
+  node node-axios node-http node-request
+  objectivec
+  ocaml
+  php php-guzzle php-requests
+  powershell powershell-webrequest
+  python (the default) python-http
   r
   ruby
   rust
+  swift
   wget
 
 -: read curl command from stdin
