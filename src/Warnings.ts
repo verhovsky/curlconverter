@@ -1,4 +1,4 @@
-import type { Parser } from "./shell/Parser.js";
+import type { TreeCursor, SyntaxNode } from "@lezer/common";
 import type { GlobalConfig } from "./curl/opts.js";
 import type { Request } from "./Request.js";
 
@@ -9,95 +9,90 @@ export function warnf(global: GlobalConfig, warning: [string, string]) {
 }
 
 function underline(
-  node: Parser.SyntaxNode | Parser.TreeCursor,
-  startIndex: number,
-  endIndex: number,
+  node: SyntaxNode | TreeCursor,
+  from: number,
+  to: number,
   curlCommand: string,
 ): string {
-  if (startIndex === endIndex) {
-    endIndex++;
+  if (from === to) {
+    to++;
   }
 
   // TODO: \r ?
-  let lineStart = startIndex;
-  if (startIndex > 0) {
+  let lineStart = from;
+  if (from > 0) {
     // If it's -1 we're on the first line
-    lineStart = curlCommand.lastIndexOf("\n", startIndex - 1) + 1;
+    lineStart = curlCommand.lastIndexOf("\n", from - 1) + 1;
   }
 
-  let underlineLength = endIndex - startIndex;
-  let lineEnd = curlCommand.indexOf("\n", startIndex);
+  let underlineLength = to - from;
+  let lineEnd = curlCommand.indexOf("\n", from);
   if (lineEnd === -1) {
     lineEnd = curlCommand.length;
-  } else if (lineEnd < endIndex) {
+  } else if (lineEnd < to) {
     // Add extra "^" past the end of a line to signal that the node continues
-    underlineLength = lineEnd - startIndex + 1;
+    underlineLength = lineEnd - from + 1;
   }
 
   const line = curlCommand.slice(lineStart, lineEnd);
-  const underline =
-    " ".repeat(startIndex - lineStart) + "^".repeat(underlineLength);
+  const underline = " ".repeat(from - lineStart) + "^".repeat(underlineLength);
   return line + "\n" + underline;
 }
 
-export function underlineCursor(
-  node: Parser.TreeCursor,
-  curlCommand: string,
-): string {
-  return underline(node, node.startIndex, node.endIndex, curlCommand);
+export function underlineCursor(node: TreeCursor, curlCommand: string): string {
+  return underline(node, node.from, node.to, curlCommand);
 }
 
-export function underlineNode(
-  node: Parser.SyntaxNode,
-  curlCommand?: string,
-): string {
+export function underlineNode(node: SyntaxNode, curlCommand?: string): string {
+  return "";
   // doesn't include leading whitespace
-  const command = node.tree.rootNode;
-  let startIndex = node.startIndex;
-  let endIndex = node.endIndex;
-  if (!curlCommand) {
-    curlCommand = command.text;
-    startIndex -= command.startIndex;
-    endIndex -= command.startIndex;
-  }
-  return underline(node, startIndex, endIndex, curlCommand);
+  // const command = node.toTree().topNode;
+  // let from = node.from;
+  // let to = node.to;
+  // if (!curlCommand) {
+  //   curlCommand = command.text;
+  //   from -= command.from;
+  //   to -= command.from;
+  // }
+  // return underline(node, from, to, curlCommand);
 }
 
 export function underlineNodeEnd(
-  node: Parser.SyntaxNode,
+  node: SyntaxNode,
   curlCommand?: string,
 ): string {
+  return "";
   // doesn't include leading whitespace
-  const command = node.tree.rootNode;
-  let startIndex = node.startIndex;
-  let endIndex = node.endIndex;
-  if (!curlCommand) {
-    curlCommand = command.text;
-    startIndex -= command.startIndex;
-    endIndex -= command.startIndex;
-  }
-  if (startIndex === endIndex) {
-    endIndex++;
-  }
+  // const command = node.tree.rootNode;
+  // let from = node.from;
+  // let to = node.to;
+  // if (!curlCommand) {
+  //   curlCommand = command.text;
+  //   from -= command.from;
+  //   to -= command.from;
+  // }
+  // if (from === to) {
+  //   to++;
+  // }
 
-  // TODO: \r ?
-  let lineStart = startIndex;
-  if (startIndex > 0) {
-    // If it's -1 we're on the first line
-    lineStart = curlCommand.lastIndexOf("\n", endIndex - 1) + 1;
-  }
+  // // TODO: \r ?
+  // let lineStart = from;
+  // if (from > 0) {
+  //   // If it's -1 we're on the first line
+  //   lineStart = curlCommand.lastIndexOf("\n", to - 1) + 1;
+  // }
 
-  const underlineStart = Math.max(startIndex, lineStart);
-  const underlineLength = endIndex - underlineStart;
-  let lineEnd = curlCommand.indexOf("\n", endIndex);
-  if (lineEnd === -1) {
-    lineEnd = curlCommand.length;
-  }
+  // const underlineStart = Math.max(from, lineStart);
+  // const underlineLength = to - underlineStart;
+  // let lineEnd = curlCommand.indexOf("\n", to);
+  // if (lineEnd === -1) {
+  //   lineEnd = curlCommand.length;
+  // }
 
-  const line = curlCommand.slice(lineStart, lineEnd);
-  const underline =
-    " ".repeat(underlineStart - lineStart) + "^".repeat(underlineLength);
-  return line + "\n" + underline;
+  // const line = curlCommand.slice(lineStart, lineEnd);
+  // const underline =
+  //   " ".repeat(underlineStart - lineStart) + "^".repeat(underlineLength);
+  // return line + "\n" + underline;
 }
 
 export interface Support {

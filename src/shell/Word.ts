@@ -4,14 +4,14 @@
 // ["foobar", {type: "variable", value: "baz", text: "$baz"}, "qux"]
 // Except for the empty string [""], there should be no empty strings in the array.
 
-import type { Parser } from "./Parser.js";
 import { CCError } from "../utils.js";
+import type { SyntaxNode } from "@lezer/common";
 
 export interface ShellToken {
   type: "variable" | "command";
   value: string;
   text: string;
-  syntaxNode: Parser.SyntaxNode; // For error reporting
+  syntaxNode: SyntaxNode; // For error reporting
 }
 export type Token = string | ShellToken;
 

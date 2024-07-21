@@ -3,8 +3,8 @@ import { Word, Token, firstShellToken } from "./Word.js";
 import { CCError } from "../utils.js";
 import { clip } from "../parse.js";
 
-import parser from "./Parser.js";
-import type { Parser } from "./Parser.js";
+import type { Tree, TreeCursor, SyntaxNode } from "@lezer/common";
+import { parser } from "@fig/lezer-bash";
 
 import { underlineNode, underlineCursor, type Warnings } from "../Warnings.js";
 
@@ -101,43 +101,50 @@ function removeAnsiCBackslashes(str: string): string {
   return str.replace(ANSI_BACKSLASHES, unescapeChar);
 }
 
+function getText(curlCommand: string, node: SyntaxNode | TreeCursor) {
+  return curlCommand.slice(node.from, node.to);
+}
+
 function toTokens(
-  node: Parser.SyntaxNode,
+  node: SyntaxNode | TreeCursor,
   curlCommand: string,
   warnings: Warnings,
 ): Token[] {
   let vals: Token[] = [];
-  switch (node.type) {
+  switch (node.name) {
     case "$":
       // TODO: https://github.com/tree-sitter/tree-sitter-bash/issues/258
       return ["$"];
     case "word":
     case "number":
       // TODO: number might have a ${variable}
-      return [removeBackslashes(node.text)];
+      return [removeBackslashes(getText(curlCommand, node))];
     case "raw_string":
       return [node.text.slice(1, -1)];
     case "ansi_c_string":
-      return [removeAnsiCBackslashes(node.text.slice(2, -1))];
+      return [removeAnsiCBackslashes(getText(curlCommand, node).slice(2, -1))];
     case "string":
     case "translated_string": {
       // TODO: MISSING quotes, for example
       // curl "example.com
       let res = "";
-      for (const child of node.namedChildren) {
-        if (child.type === "string_content") {
-          res += removeDoubleQuoteBackslashes(child.text);
-        } else {
-          // expansion, simple_expansion or command_substitution (or concat?)
-          const subVal = toTokens(child, curlCommand, warnings);
-          if (typeof subVal === "string") {
-            res += subVal;
+      if (node.firstChild) {
+        const child = node.firstChild.cursor();
+        while (child.nextSibling()) {
+          if (child.name === "string_content") {
+            res += removeDoubleQuoteBackslashes(getText(curlCommand, node));
           } else {
-            if (res) {
-              vals.push(res);
-              res = "";
+            // expansion, simple_expansion or command_substitution (or concat?)
+            const subVal = toTokens(child, curlCommand, warnings);
+            if (typeof subVal === "string") {
+              res += subVal;
+            } else {
+              if (res) {
+                vals.push(res);
+                res = "";
+              }
+              vals = vals.concat(subVal);
             }
-            vals = vals.concat(subVal);
           }
         }
       }
@@ -153,17 +160,14 @@ function toTokens(
         "expansion",
         "found environment variable\n" + underlineNode(node, curlCommand),
       ]);
-      if (
-        node.firstNamedChild &&
-        node.firstNamedChild.type === "special_variable_name"
-      ) {
+      if (node.firstChild && node.firstChild.name === "special_variable_name") {
         // https://www.gnu.org/software/bash/manual/bash.html#Special-Parameters
         // TODO: warning isn't printed
         warnings.push([
           "special_variable_name",
-          node.text +
+          getText(curlCommand, node) +
             " is a special Bash variable\n" +
-            underlineNode(node.firstNamedChild, curlCommand),
+            underlineNode(node.firstChild, curlCommand),
         ]);
       }
       return [
@@ -219,8 +223,8 @@ function toTokens(
       for (const child of node.children) {
         // TODO: removeBackslashes()?
         // Can we get anything other than []{} characters here?
-        res += node.text.slice(prevEnd, child.startIndex - node.startIndex);
-        prevEnd = child.endIndex - node.startIndex;
+        res += node.text.slice(prevEnd, child.from - node.from);
+        prevEnd = child.to - node.from;
 
         const subVal = toTokens(child, curlCommand, warnings);
         if (typeof subVal === "string") {
@@ -250,16 +254,14 @@ function toTokens(
 }
 
 function toWord(
-  node: Parser.SyntaxNode,
+  node: SyntaxNode,
   curlCommand: string,
   warnings: Warnings,
 ): Word {
   return new Word(toTokens(node, curlCommand, warnings));
 }
 
-function* traverseLookingForBadNodes(
-  tree: Parser.Tree,
-): Generator<Parser.TreeCursor> {
+function* traverseLookingForBadNodes(tree: Tree): Generator<TreeCursor> {
   const cursor = tree.walk();
 
   let reachedRoot = false;
@@ -290,11 +292,7 @@ function* traverseLookingForBadNodes(
   }
 }
 
-function warnAboutBadNodes(
-  ast: Parser.Tree,
-  curlCommand: string,
-  warnings: Warnings,
-) {
+function warnAboutBadNodes(ast: Tree, curlCommand: string, warnings: Warnings) {
   const maxShown = 3;
   let count = 0;
   for (const badNode of traverseLookingForBadNodes(ast)) {
@@ -324,7 +322,7 @@ function warnAboutBadNodes(
 }
 
 function warnAboutUselessBackslash(
-  n: Parser.SyntaxNode,
+  n: SyntaxNode,
   curlCommandLines: string[],
   warnings: Warnings,
 ) {
@@ -350,10 +348,10 @@ function warnAboutUselessBackslash(
 }
 
 function extractRedirect(
-  node: Parser.SyntaxNode,
+  node: SyntaxNode,
   curlCommand: string,
   warnings: Warnings,
-): [Parser.SyntaxNode, Word?, Word?] {
+): [SyntaxNode, Word?, Word?] {
   if (!node.namedChildCount) {
     throw new CCError('got empty "redirected_statement" AST node');
   }
@@ -421,10 +419,10 @@ function extractRedirect(
 }
 
 function _findCurlInPipeline(
-  node: Parser.SyntaxNode,
+  node: SyntaxNode,
   curlCommand: string,
   warnings: Warnings,
-): [Parser.SyntaxNode?, Word?, Word?] {
+): [SyntaxNode?, Word?, Word?] {
   let command, stdin, stdinFile;
   for (const child of node.namedChildren) {
     if (child.type === "command") {
@@ -512,10 +510,10 @@ function _findCurlInPipeline(
 // TODO: use pipeline input/output redirects,
 // i.e. add stdinCommand and stdout/stdoutFile/stdoutCommand
 function findCurlInPipeline(
-  node: Parser.SyntaxNode,
+  node: SyntaxNode,
   curlCommand: string,
   warnings: Warnings,
-): [Parser.SyntaxNode, Word?, Word?] {
+): [SyntaxNode, Word?, Word?] {
   const [command, stdin, stdinFile] = _findCurlInPipeline(
     node,
     curlCommand,
@@ -533,10 +531,10 @@ function findCurlInPipeline(
 // TODO: check entire AST for ERROR/MISSING nodes
 // TODO: get all command nodes
 function extractCommandNodes(
-  ast: Parser.Tree,
+  ast: Tree,
   curlCommand: string,
   warnings: Warnings,
-): [Parser.SyntaxNode, Word?, Word?][] {
+): [SyntaxNode, Word?, Word?][] {
   // https://github.com/tree-sitter/tree-sitter-bash/blob/master/grammar.js
   // The AST must be in a nice format, i.e.
   // (program
@@ -575,7 +573,7 @@ function extractCommandNodes(
 
   const curlCommandLines = curlCommand.split("\n");
   let sawComment = false;
-  const commands: [Parser.SyntaxNode, Word?, Word?][] = [];
+  const commands: [SyntaxNode, Word?, Word?][] = [];
   // Get top-level command and redirected_statement AST nodes, skipping comments
   for (const n of ast.rootNode.namedChildren) {
     switch (n.type) {
@@ -624,10 +622,10 @@ function extractCommandNodes(
 }
 
 function toNameAndArgv(
-  command: Parser.SyntaxNode,
+  command: SyntaxNode,
   curlCommand: string,
   warnings: Warnings,
-): [Parser.SyntaxNode, Parser.SyntaxNode[]] {
+): [SyntaxNode, SyntaxNode[]] {
   if (command.childCount < 1) {
     // TODO: better error message.
     throw new CCError(
@@ -653,7 +651,7 @@ function toNameAndArgv(
 
 // Checks that name is "curl"
 function nameToWord(
-  name: Parser.SyntaxNode,
+  name: SyntaxNode,
   curlCommand: string,
   warnings: Warnings,
 ): Word {
